@@ -2,12 +2,12 @@ package models.school
 
 import java.util.UUID
 
-import models.Helpers.{Columns, ForeignKeys}
+import models.Helpers.Columns
 import models.helpers.OptionallyOwnable
-import play.api.libs.json.{Writes, JsObject, JsValue, Json}
+import play.api.libs.json._
 import slick.driver.MySQLDriver.api._
-import system.helpers.{PropertyValidators, ResourceCollection, Resource}
 import system.helpers.SlickHelper._
+import system.helpers.{PropertyValidators, Resource, ResourceCollection}
 
 import scala.util.{Failure, Success, Try}
 
@@ -61,8 +61,8 @@ object Topics extends ResourceCollection[Topics, Topic] {
     */
   val validators =
     Set(
-      ("name", true, Set(PropertyValidators.title _)),
-      ("ownerId", false, Set(PropertyValidators.uuid4 _))
+      ("title", true, Set(PropertyValidators.title _)),
+      ("public", false, Set(PropertyValidators.boolean _))
     )
 
   /**
@@ -76,7 +76,14 @@ object Topics extends ResourceCollection[Topics, Topic] {
     Topic(
       uuid,
       arguments("title").as[String],
-      arguments("ownerId").asOpt[UUID]
+      arguments.get("public") match {
+        case Some(p: JsBoolean) if !p.value =>
+          Some(arguments("userId").as[UUID])
+        case None =>
+          Some(arguments("userId").as[UUID])
+        case _ =>
+          None
+      }
     )
 
   /**
@@ -91,7 +98,14 @@ object Topics extends ResourceCollection[Topics, Topic] {
       row.id,
       arguments.get("title")
         .fold(row.title)(_.as[String]),
-      row.ownerId
+      arguments.get("public") match {
+        case Some(p: JsBoolean) if !p.value =>
+          Some(arguments("userId").as[UUID])
+        case None =>
+          Some(arguments("userId").as[UUID])
+        case _ =>
+          None
+      }
     )
 
 

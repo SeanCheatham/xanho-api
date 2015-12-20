@@ -85,7 +85,6 @@ object MicrodegreeRevisionProposals extends ResourceCollection[MicrodegreeRevisi
   val validators =
     Set(
       ("microdegreeId", true, Set(PropertyValidators.uuid4 _)),
-      ("ownerId", false, Set(PropertyValidators.uuid4 _)),
       ("content", true, Set(PropertyValidators.content _))
     )
 
@@ -99,7 +98,7 @@ object MicrodegreeRevisionProposals extends ResourceCollection[MicrodegreeRevisi
               arguments: Map[String, JsValue]) =
     MicrodegreeRevisionProposal(
       uuid,
-      arguments("ownerId").as[UUID],
+      arguments("userId").as[UUID],
       arguments("microdegreeId").as[UUID],
       SlickHelper.queryResult(
         MicrodegreeRevisions.tableQuery
@@ -150,20 +149,7 @@ object MicrodegreeRevisionProposals extends ResourceCollection[MicrodegreeRevisi
   def canCreate(resourceId: Option[UUID],
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
-    userId.nonEmpty &&
-      (Try(resourceId.get.toInstance[MicrodegreeRevisionProposals, MicrodegreeRevisionProposal](tableQueries.microdegreeRevisionProposals)) match {
-        case Success(instance) =>
-          userId.fold(false)(uid =>
-            Try(instance.microdegreeId.toInstance[Microdegrees, Microdegree](tableQueries.microdegrees)) match {
-              case Success(microdegree) =>
-                microdegree.ownerId.fold(true)(_ == uid)
-              case _ =>
-                false
-            }
-          )
-        case Failure(_) =>
-          false
-      })
+    userId.nonEmpty
 
 }
 

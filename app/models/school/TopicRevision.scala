@@ -2,13 +2,13 @@ package models.school
 
 import java.util.UUID
 
-import models.Helpers.{Columns, ForeignKeys}
-import play.api.libs.json.{Writes, JsObject, JsValue, Json}
+import models.Helpers.Columns
+import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import slick.driver.MySQLDriver.api._
-import system.helpers.{Resource, SlickHelper, PropertyValidators, ResourceCollection}
 import system.helpers.SlickHelper._
+import system.helpers.{PropertyValidators, Resource, ResourceCollection, SlickHelper}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 /**
   * Represents a revision to a [[Topic]]
@@ -83,8 +83,8 @@ object TopicRevisions extends ResourceCollection[TopicRevisions, TopicRevision] 
     */
   val validators =
     Set(
-      ("name", true, Set(PropertyValidators.title _)),
-      ("ownerId", false, Set(PropertyValidators.uuid4 _))
+      ("topicId", true, Set(PropertyValidators.uuid4 _)),
+      ("proposalId", true, Set(PropertyValidators.uuid4 _))
     )
 
   /**
@@ -101,7 +101,7 @@ object TopicRevisions extends ResourceCollection[TopicRevisions, TopicRevision] 
         tableQuery
           .filter(tr => tr.topicId === arguments("topicId").as[UUID] && tr.proposalId === arguments("proposalId").as[UUID])
           .map(_.revisionNumber).max.result
-      ).getOrElse(0),
+      ).fold(0)(_ + 1),
       arguments("topicId").as[UUID],
       arguments("proposalId").as[UUID]
     )
@@ -147,19 +147,15 @@ object TopicRevisions extends ResourceCollection[TopicRevisions, TopicRevision] 
   def canCreate(resourceId: Option[UUID],
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
-    userId.nonEmpty &&
-      (Try(resourceId.get.toInstance[TopicRevisions, TopicRevision](tableQueries.topicRevisions)) match {
-        case Success(instance) =>
-          userId.fold(false)(uid =>
-            Try(instance.topicId.toInstance[Topics, Topic](tableQueries.topics)) match {
-              case Success(topic) =>
-                topic.ownerId.fold(true)(_ == uid)
-              case _ =>
-                false
-            }
-          )
-        case Failure(_) =>
-          false
-      })
+    userId
+      .fold(false)(uid =>
+        Try((data \ "topicId").as[UUID].toInstance[Topics, Topic](tableQueries.topics)) match {
+          case Success(topic) =>
+            topic.ownerId.fold(true)(_ == uid)
+          case _ =>
+            false
+        }
+      )
+
 
 }

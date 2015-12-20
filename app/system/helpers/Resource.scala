@@ -273,7 +273,7 @@ object PropertyValidators {
     s.validate(__.read[JsString])
       .fold(
         _ => Some(PropertyErrorCodes.INVALID_TYPE),
-        _ => s.validate[String](__.read(minLength[String](100)))
+        _ => s.validate[String](__.read(minLength[String](50)))
           .fold(
             _ => Some(PropertyErrorCodes.TOO_SHORT),
             _ => None
@@ -324,6 +324,18 @@ object PropertyValidators {
       )
 
   /**
+    * Validates that the given input is a Boolean data type
+    * @param s The given input
+    * @return An optional error code
+    */
+  def boolean(s: JsValue): Option[Int] =
+    s.validate(__.read[Boolean])
+      .fold(
+        _ => Some(PropertyErrorCodes.INVALID_TYPE),
+        _ => None
+      )
+
+  /**
     * Validates an integer field
     * @param s The given input
     * @return An optional error code
@@ -370,7 +382,7 @@ object PropertyValidators {
       )
 
   private val namePattern =
-    """[A-Za-z-]*""".r
+    """[A-Za-z- ]*""".r
 
   private val nonAlphaNumericPattern =
     """([^A-Za-z0-9])""".r

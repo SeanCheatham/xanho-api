@@ -178,7 +178,7 @@ object Enrollments extends ResourceCollection[Enrollments, Enrollment] {
                 .filter(enrollment => enrollment.topicRevisionId === trid && enrollment.studentId === uid)
                 .result
                 .headOption
-            ).fold(true)(_ => false)
+            ).fold((data \ "studentId").as[UUID] == uid)(_ => false)
           )
       )
 

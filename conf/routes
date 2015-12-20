@@ -73,3 +73,9 @@ POST          /topicRequirements                       controllers.school.TopicR
 GET           /topicRequirements/:id                   controllers.school.TopicRequirement.read(id: String)
 PUT           /topicRequirements/:id                   controllers.school.TopicRequirement.update(id: String)
 DELETE        /topicRequirements/:id                   controllers.school.TopicRequirement.delete(id: String)
+
+# Enrollment Routes
+POST          /enrollments                       controllers.school.Enrollment.create
+GET           /enrollments/:id                   controllers.school.Enrollment.read(id: String)
+PUT           /enrollments/:id                   controllers.school.Enrollment.update(id: String)
+DELETE        /enrollments/:id                   controllers.school.Enrollment.delete(id: String)

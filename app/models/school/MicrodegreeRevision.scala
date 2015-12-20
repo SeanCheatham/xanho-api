@@ -2,11 +2,11 @@ package models.school
 
 import java.util.UUID
 
-import models.Helpers.{Columns, ForeignKeys}
+import models.Helpers.Columns
 import play.api.libs.json.{JsObject, JsValue, Json}
 import slick.driver.MySQLDriver.api._
 import system.helpers.SlickHelper._
-import system.helpers.{Resource, PropertyValidators, ResourceCollection, SlickHelper}
+import system.helpers.{PropertyValidators, Resource, ResourceCollection, SlickHelper}
 
 import scala.util.{Failure, Success, Try}
 
@@ -83,8 +83,8 @@ object MicrodegreeRevisions extends ResourceCollection[MicrodegreeRevisions, Mic
     */
   val validators =
     Set(
-      ("name", true, Set(PropertyValidators.title _)),
-      ("ownerId", false, Set(PropertyValidators.uuid4 _))
+      ("microdegreeId", true, Set(PropertyValidators.uuid4 _)),
+      ("proposalId", true, Set(PropertyValidators.uuid4 _))
     )
 
   /**
@@ -101,7 +101,7 @@ object MicrodegreeRevisions extends ResourceCollection[MicrodegreeRevisions, Mic
         tableQuery
           .filter(tr => tr.microdegreeId === arguments("microdegreeId").as[UUID] && tr.proposalId === arguments("proposalId").as[UUID])
           .map(_.revisionNumber).max.result
-      ).getOrElse(0),
+      ).fold(0)(_ + 1),
       arguments("microdegreeId").as[UUID],
       arguments("proposalId").as[UUID]
     )
@@ -147,19 +147,14 @@ object MicrodegreeRevisions extends ResourceCollection[MicrodegreeRevisions, Mic
   def canCreate(resourceId: Option[UUID],
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
-    userId.nonEmpty &&
-      (Try(resourceId.get.toInstance[MicrodegreeRevisions, MicrodegreeRevision](tableQueries.microdegreeRevisions)) match {
-        case Success(instance) =>
-          userId.fold(false)(uid =>
-            Try(instance.microdegreeId.toInstance[Microdegrees, Microdegree](tableQueries.microdegrees)) match {
-              case Success(microdegree) =>
-                microdegree.ownerId.fold(true)(_ == uid)
-              case _ =>
-                false
-            }
-          )
-        case Failure(_) =>
-          false
-      })
+    userId
+      .fold(false)(uid =>
+        Try((data \ "microdegreeId").as[UUID].toInstance[Microdegrees, Microdegree](tableQueries.microdegrees)) match {
+          case Success(microdegree) =>
+            microdegree.ownerId.fold(true)(_ == uid)
+          case _ =>
+            false
+        }
+      )
 
 }

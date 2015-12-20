@@ -85,7 +85,6 @@ object TopicRevisionProposals extends ResourceCollection[TopicRevisionProposals,
   val validators =
     Set(
       ("topicId", true, Set(PropertyValidators.uuid4 _)),
-      ("ownerId", false, Set(PropertyValidators.uuid4 _)),
       ("content", true, Set(PropertyValidators.content _))
     )
 
@@ -99,7 +98,7 @@ object TopicRevisionProposals extends ResourceCollection[TopicRevisionProposals,
               arguments: Map[String, JsValue]) =
     TopicRevisionProposal(
       uuid,
-      arguments("ownerId").as[UUID],
+      arguments("userId").as[UUID],
       arguments("topicId").as[UUID],
       SlickHelper.queryResult(
         TopicRevisions.tableQuery
@@ -150,19 +149,6 @@ object TopicRevisionProposals extends ResourceCollection[TopicRevisionProposals,
   def canCreate(resourceId: Option[UUID],
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
-    userId.nonEmpty &&
-      (Try(resourceId.get.toInstance[TopicRevisionProposals, TopicRevisionProposal](tableQueries.topicRevisionProposals)) match {
-        case Success(instance) =>
-          userId.fold(false)(uid =>
-            Try(instance.topicId.toInstance[Topics, Topic](tableQueries.topics)) match {
-              case Success(topic) =>
-                topic.ownerId.fold(true)(_ == uid)
-              case _ =>
-                false
-            }
-          )
-        case Failure(_) =>
-          false
-      })
+    userId.nonEmpty
 
 }

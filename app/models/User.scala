@@ -161,7 +161,7 @@ object Users extends ResourceCollection[Users, User] {
               userId: Option[UUID],
               data: JsObject = Json.obj()): Boolean =
     userId
-      .fold(false)(_ == resourceId)
+      .fold(false)(uid => resourceId.fold(false)(_ == uid))
 
   /**
     * @inheritdoc
@@ -178,7 +178,7 @@ object Users extends ResourceCollection[Users, User] {
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
     userId
-      .fold(false)(_ == resourceId)
+      .fold(false)(uid => resourceId.fold(false)(_ == uid))
 
   /**
     * @inheritdoc
