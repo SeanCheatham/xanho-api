@@ -7,7 +7,7 @@ import _root_.play.api.libs.json.{JsValue, Json}
 import _root_.play.api.mvc.{Action, Controller}
 import models.Helpers.Columns
 import slick.driver.MySQLDriver.api._
-import system.helpers.PropertyValidators.PropertyErrorCodes
+import system.helpers.Validator.PropertyErrorCodes
 import system.helpers._
 
 

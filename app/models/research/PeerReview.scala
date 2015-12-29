@@ -6,7 +6,7 @@ import models.Helpers.{Columns, ForeignKeys}
 import models.helpers.Ownable
 import play.api.libs.json.{JsObject, JsValue, Json}
 import slick.driver.MySQLDriver.api._
-import system.helpers.{Resource, PropertyValidators, ResourceCollection}
+import system.helpers.{Resource, Validator$, ResourceCollection}
 import system.helpers.SlickHelper._
 
 import scala.util.{Failure, Success, Try}
@@ -86,8 +86,8 @@ object PeerReviews extends ResourceCollection[PeerReviews, PeerReview] {
     */
   val validators =
     Set(
-      ("ownerId", true, Set(PropertyValidators.uuid4 _)),
-      ("projectDraftId", true, Set(PropertyValidators.uuid4 _)),
+      ("ownerId", true, Set(Validator.uuid4 _)),
+      ("projectDraftId", true, Set(Validator.uuid4 _)),
       ("content", true, Set[JsValue => Option[Int]]())
     )
 

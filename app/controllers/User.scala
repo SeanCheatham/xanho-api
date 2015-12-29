@@ -5,7 +5,7 @@ import models.Users
 import models.Users._
 import play.api.libs.json.Json
 import system.helpers.JwtPlayImplicits._
-import system.helpers.{PropertyValidators, ResponseHelpers}
+import system.helpers.{Validator$, ResponseHelpers}
 
 
 class User extends CRUDController[Users, models.User] {
@@ -24,11 +24,11 @@ class User extends CRUDController[Users, models.User] {
     Authorized(resourceId = None)(parse.json)(implicit request => {
       request.userId
         .fold({
-          PropertyValidators.validateArguments(
+          Validator.validateArguments(
             request.data.value.toMap,
             Set(
-              ("email", true, Set(PropertyValidators.email _)),
-              ("password", true, Set(PropertyValidators.password _))
+              ("email", true, Set(Validator.email _)),
+              ("password", true, Set(Validator.password _))
             )
           ) match {
             case m if m.nonEmpty =>

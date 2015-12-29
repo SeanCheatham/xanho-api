@@ -1,4 +1,4 @@
-package models.school
+package brain.neuronTypes.school
 
 import java.util.UUID
 
@@ -12,50 +12,49 @@ import system.helpers.{Validator$, Resource, ResourceCollection}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Represents a microdegree or unit, which covers a specific area
-  * @param id The microdegree's ID
-  * @param title The microdegree's name or title
-  * @param ownerId The optional [[models.User]] owner of this microdegree.  If [[None]], then
-  *                this microdegree is considered to be owned by the public.
+  * Represents a topic or unit, which covers a specific area
+  * @param id The topic's ID
+  * @param title The topic's name or title
+  * @param ownerId The optional [[models.User]] owner of this topic.  If [[None]], then
+  *                this topic is considered to be owned by the public.
   */
-case class Microdegree(id: UUID,
-                       title: String,
-                       ownerId: Option[UUID]) extends OptionallyOwnable with Resource
+case class Topic(id: UUID,
+                 title: String,
+                 ownerId: Option[UUID]) extends OptionallyOwnable with Resource
 
 /**
-  * A [[slick.profile.RelationalTableComponent.Table]] for [[Microdegree]]s
+  * A [[slick.profile.RelationalTableComponent.Table]] for [[Topic]]s
   * @param tag @see [[slick.lifted.Tag]]
   */
-class Microdegrees(tag: Tag)
-  extends Table[Microdegree](tag, "microdegrees")
-  with Columns.Id[Microdegree]
-  with Columns.Title[Microdegree]
-  with Columns.OptionalOwnerId[Microdegree] {
+class Topics(tag: Tag)
+  extends Table[Topic](tag, "topics")
+  with Columns.Id[Topic]
+  with Columns.Title[Topic]
+  with Columns.OptionalOwnerId[Topic] {
 
   /**
     * @see [[slick.profile.RelationalTableComponent.Table.*]]
     */
   def * =
-    (id, title, ownerId).<>(Microdegree.tupled, Microdegree.unapply)
+    (id, title, ownerId).<>(Topic.tupled, Topic.unapply)
 
   def owner =
-    foreignKey("fk_microdegree_owner_id", ownerId, models.tableQueries.users)(_.id.?)
-
+    foreignKey("fk_topic_owner_id", ownerId, models.tableQueries.users)(_.id.?)
 }
 
-object Microdegrees extends ResourceCollection[Microdegrees, Microdegree] {
+object Topics extends ResourceCollection[Topics, Topic] {
 
   /**
     * @inheritdoc
     */
   val tableQuery =
-    TableQuery[Microdegrees]
+    TableQuery[Topics]
 
   /**
     * @inheritdoc
     */
-  implicit val writes: Writes[Microdegree] =
-    Json.writes[Microdegree]
+  implicit val writes: Writes[Topic] =
+    Json.writes[Topic]
 
   /**
     * @inheritdoc
@@ -70,11 +69,11 @@ object Microdegrees extends ResourceCollection[Microdegrees, Microdegree] {
     * @inheritdoc
     * @param uuid The UUID to use in the creation
     * @param arguments A map containing values to be updated
-    * @return A new [[Microdegree]]
+    * @return A new [[Topic]]
     */
   def creator(uuid: UUID,
               arguments: Map[String, JsValue]) =
-    Microdegree(
+    Topic(
       uuid,
       arguments("title").as[String],
       arguments.get("public") match {
@@ -89,11 +88,11 @@ object Microdegrees extends ResourceCollection[Microdegrees, Microdegree] {
 
   /**
     * @inheritdoc
-    * @param row A [[Microdegree]]
+    * @param row A [[Topic]]
     * @param arguments A map containing values to be updated
-    * @return A new [[Microdegree]]
+    * @return A new [[Topic]]
     */
-  def updater(row: Microdegree,
+  def updater(row: Topic,
               arguments: Map[String, JsValue]) =
     row.copy(
       row.id,
@@ -132,7 +131,7 @@ object Microdegrees extends ResourceCollection[Microdegrees, Microdegree] {
   def canModify(resourceId: Option[UUID],
                 userId: Option[UUID],
                 data: JsObject = Json.obj()): Boolean =
-    Try(resourceId.get.toInstance[Microdegrees, Microdegree](tableQueries.microdegrees)) match {
+    Try(resourceId.get.toInstance[Topics, Topic](tableQueries.topics)) match {
       case Success(instance) =>
         userId.fold(false)(uid => instance.ownerId.fold(true)(_ == uid))
       case Failure(_) =>

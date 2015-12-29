@@ -169,7 +169,7 @@ trait ResourceCollection[T <: Table[R] with Columns.Id[R], R <: Resource] {
     * @return A invalid property mapping from a property name to an error status
     */
   def validateArguments(arguments: Map[String, JsValue]): Map[String, Int] =
-    PropertyValidators.validateArguments(arguments, validators)
+    Validator.validateArguments(arguments, validators)
 
 }
 
@@ -185,7 +185,7 @@ object PropertyValidators {
                         validators: Set[(String, Boolean, Set[(JsValue => Option[Int])])]): Map[String, Int] =
     (validators map {
       case (key: String, required: Boolean, rules: Set[(JsValue => Option[Int])]) =>
-        key -> PropertyValidators.validate(key, arguments, required, rules)
+        key -> Validator.validate(key, arguments, required, rules)
     }).toMap collect {
       case (key, Some(value)) =>
         key -> value

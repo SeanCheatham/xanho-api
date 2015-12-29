@@ -1,26 +1,33 @@
-package models
+package brain.neuronTypes
 
 import java.util.UUID
 
 import _root_.play.api.libs.json.{JsObject, JsValue, Json, Writes}
+import brain.Neuron
 import com.github.t3hnar.bcrypt._
 import models.Helpers.Columns
 import slick.driver.MySQLDriver.api._
 import system.helpers.{SlickHelper, Validator$, Resource, ResourceCollection}
 
 /**
-  * A Xanho User/Member
-  * @param id The user's ID
-  * @param firstName The user's first name
-  * @param lastName The user's last name
-  * @param email The user's email address
-  * @param password The user's password
+  * A Xanho user
+  * @param id @see [[Neuron.id]]
+  * @param name @see [[Neuron.name]]
+  * @param shortData @see [[Neuron.shortData]]
+  * @param data @see [[Neuron.data]]
   */
 case class User(id: UUID,
-                firstName: String,
-                lastName: String,
-                email: String,
-                password: String) extends Resource
+                name: Option[String],
+                shortData: Option[JsObject],
+                data: Option[JsObject]) extends Neuron {
+
+  /**
+    * @inheritdoc
+    */
+  val neuronType =
+    "user"
+
+}
 
 object UserHelper {
 
@@ -72,7 +79,7 @@ class Users(tag: Tag)
     (id, firstName, lastName, email, password).<>(User.tupled, User.unapply)
 }
 
-object Users extends ResourceCollection[Users, User] {
+object Users extends ResourceColleoction[Users, User] {
 
   /**
     * @inheritdoc

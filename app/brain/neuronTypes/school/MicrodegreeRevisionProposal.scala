@@ -1,4 +1,4 @@
-package models.school
+package brain.neuronTypes.school
 
 import java.util.UUID
 

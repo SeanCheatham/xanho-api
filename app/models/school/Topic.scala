@@ -7,7 +7,7 @@ import models.helpers.OptionallyOwnable
 import play.api.libs.json._
 import slick.driver.MySQLDriver.api._
 import system.helpers.SlickHelper._
-import system.helpers.{PropertyValidators, Resource, ResourceCollection}
+import system.helpers.{Validator$, Resource, ResourceCollection}
 
 import scala.util.{Failure, Success, Try}
 
@@ -61,8 +61,8 @@ object Topics extends ResourceCollection[Topics, Topic] {
     */
   val validators =
     Set(
-      ("title", true, Set(PropertyValidators.title _)),
-      ("public", false, Set(PropertyValidators.boolean _))
+      ("title", true, Set(Validator.title _)),
+      ("public", false, Set(Validator.boolean _))
     )
 
   /**

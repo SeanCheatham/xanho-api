@@ -1,4 +1,4 @@
-package models.research
+package brain.neuronTypes.research
 
 import java.util.UUID
 
